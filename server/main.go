@@ -10,11 +10,11 @@ import (
 
 func main() {
 	h := handler.New(&handler.Config{
-		Schema:   &models.schema,
+		Schema:   &models.Schema,
 		Pretty:   true,
 		GraphiQL: true,
 	})
 	http.Handle("/graphql", h)
 	port := 8000
-	http.ListenAndServe(fmt.Sprintf(":$v", port), nil)
+	http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
 }

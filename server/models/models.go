@@ -7,7 +7,7 @@ type Art struct {
 	Frase string `json:"frase"`
 }
 
-var ArtType = graphql.NewObject(
+var artType = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "Arte",
 		Fields: graphql.Fields{
@@ -21,12 +21,12 @@ var ArtType = graphql.NewObject(
 	},
 )
 
-var QueryType = graphql.NewObject(
+var queryType = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "Query",
 		Fields: graphql.Fields{
 			"test": &graphql.Field{
-				Type: ArtType,
+				Type: artType,
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					return Art{
 						ID:    1,
@@ -40,6 +40,6 @@ var QueryType = graphql.NewObject(
 
 var Schema, _ = graphql.NewSchema(
 	graphql.SchemaConfig{
-		Query: QueryType,
+		Query: queryType,
 	},
 )
