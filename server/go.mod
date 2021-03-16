@@ -1,4 +1,4 @@
-module github.com/gafeol/arte-de-rua/server
+module github.com/gafeol/arte-de-rua
 
 go 1.15
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gafeol/arte-de-rua/server/models"
+	"github.com/gafeol/arte-de-rua/models"
 	"github.com/graphql-go/handler"
 )
 
@@ -15,6 +15,9 @@ func main() {
 		GraphiQL: true,
 	})
 	http.Handle("/graphql", h)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
 	port := 8000
-	http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
+	panic(http.ListenAndServe(fmt.Sprintf(":%v", port), nil))
 }

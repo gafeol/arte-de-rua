@@ -6,12 +6,6 @@ import (
 	"sync"
 )
 
-type Art struct {
-	gorm.Model
-	Frase  string `json:"frase"`
-	ImgURL string `json:"imgURL"`
-}
-
 var once sync.Once
 var db *gorm.DB = nil
 
@@ -27,24 +21,53 @@ func initDB() *gorm.DB {
 		if err = db.AutoMigrate(&Art{}); err != nil {
 			panic(err)
 		}
-		if db == nil {
-			println("FODEU DB JA EH NIL")
+		if err = db.AutoMigrate(&Artist{}); err != nil {
+			panic(err)
 		}
 	})
 	return db
 }
 
-func (art Art) Create() error {
+type Art struct {
+	gorm.Model
+	ID     uint64
+	Frase  string
+	ImgURL string
+}
+
+func (art *Art) Create() error {
 	db := initDB()
 	return db.Create(art).Error
+}
+
+func AllArts() ([]Art, error) {
+	db := initDB()
+	var arts []Art
+	err := db.Find(&arts).Error
+	return arts, err
 }
 
 func FindArt(id string) (Art, error) {
 	db := initDB()
 	var art Art
-	println("Vamo que vamo busca")
-	err := (*db).First(&art, id).Error
-	println("saiu da busca aqi")
-	println("Finding art with id ", id, "got actually ", err)
+	err := db.First(&art, id).Error
 	return art, err
+}
+
+type Artist struct {
+	gorm.Model
+	ID   uint64
+	Nome string
+}
+
+func (artist *Artist) Create() error {
+	db := initDB()
+	return db.Create(artist).Error
+}
+
+func FindArtist(id string) (Artist, error) {
+	db := initDB()
+	var artist Artist
+	err := db.First(&artist, id).Error
+	return artist, err
 }
