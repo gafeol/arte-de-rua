@@ -30,9 +30,10 @@ func initDB() *gorm.DB {
 
 type Art struct {
 	gorm.Model
-	ID     uint64
-	Frase  string
-	ImgURL string
+	ID       uint64
+	Frase    string
+	ImgURL   string
+	ArtistID uint64
 }
 
 func (art *Art) Create() error {
@@ -47,7 +48,7 @@ func AllArts() ([]Art, error) {
 	return arts, err
 }
 
-func FindArt(id string) (Art, error) {
+func FindArt(id uint64) (Art, error) {
 	db := initDB()
 	var art Art
 	err := db.First(&art, id).Error
@@ -65,7 +66,14 @@ func (artist *Artist) Create() error {
 	return db.Create(artist).Error
 }
 
-func FindArtist(id string) (Artist, error) {
+func AllArtists() ([]Artist, error) {
+	db := initDB()
+	var artists []Artist
+	err := db.Find(&artists).Error
+	return artists, err
+}
+
+func FindArtist(id uint64) (Artist, error) {
 	db := initDB()
 	var artist Artist
 	err := db.First(&artist, id).Error

@@ -2,15 +2,17 @@ package schemas
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/gafeol/arte-de-rua/orm"
 	"github.com/graphql-go/graphql"
 )
 
 type Art struct {
-	ID     string
-	Frase  string
-	ImgURL string
+	ID       uint64
+	Frase    string
+	ImgURL   string
+	ArtistID uint64
 }
 
 var artType = graphql.NewObject(
@@ -26,12 +28,19 @@ var artType = graphql.NewObject(
 			"imgURL": &graphql.Field{
 				Type: graphql.String,
 			},
+			"artist": &graphql.Field{
+				Type: artistType,
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					art := p.Source.(*classes.Art)
+					return classes.FindArtist(art.ArtistID)
+				},
+			},
 		},
 	},
 )
 
 type Artist struct {
-	ID   string
+	ID   uint64
 	Nome string
 }
 
@@ -68,13 +77,19 @@ var queryType = graphql.NewObject(
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					stringID, ok := p.Args["id"].(string)
+					stringID, ok := p.Args["id"].(uint64)
 					if ok {
 						art, err := classes.FindArt(stringID)
 						return art, err
 					} else {
 						return nil, errors.New("ID was not a string")
 					}
+				},
+			},
+			"artists": &graphql.Field{
+				Type: graphql.NewList(artistType),
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					return classes.AllArtists()
 				},
 			},
 			"artist": &graphql.Field{
@@ -85,8 +100,8 @@ var queryType = graphql.NewObject(
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					idString, _ := p.Args["id"].(string)
-					return classes.FindArtist(idString)
+					id := p.Args["id"].(uint64)
+					return classes.FindArtist(id)
 				},
 			},
 		},
@@ -106,11 +121,19 @@ var mutationType = graphql.NewObject(
 					"imgURL": &graphql.ArgumentConfig{
 						Type: graphql.String,
 					},
+					"artistID": &graphql.ArgumentConfig{
+						Type: graphql.ID,
+					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					fraseString, _ := p.Args["frase"].(string)
-					imgURLString, _ := p.Args["imgURL"].(string)
-					art := &classes.Art{Frase: fraseString, ImgURL: imgURLString}
+					fraseString := p.Args["frase"].(string)
+					imgURLString := p.Args["imgURL"].(string)
+					artistIDString := p.Args["artistID"].(string)
+					artistID, err := strconv.ParseUint(artistIDString, 10, 64)
+					if err != nil {
+						panic(err)
+					}
+					art := &classes.Art{Frase: fraseString, ImgURL: imgURLString, ArtistID: artistID}
 					if err := art.Create(); err != nil {
 						return nil, err
 					}
