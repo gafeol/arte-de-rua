@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gafeol/arte-de-rua/models"
 	"github.com/graphql-go/handler"
@@ -18,6 +20,10 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
-	port := 8000
+	port := "8000"
+	if os.Getenv("PORT") != "" {
+		port = os.Getenv("PORT")
+	}
+	log.Printf("Listening on port %v\n", port)
 	panic(http.ListenAndServe(fmt.Sprintf(":%v", port), nil))
 }
