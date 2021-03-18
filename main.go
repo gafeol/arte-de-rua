@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gafeol/arte-de-rua/models"
+	"github.com/gafeol/arte-de-rua/graphql"
 	"github.com/graphql-go/handler"
 )
 

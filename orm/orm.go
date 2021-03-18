@@ -1,4 +1,4 @@
-package classes
+package orm
 
 import (
 	"gorm.io/driver/postgres"
@@ -53,6 +53,13 @@ func FindArt(id uint64) (Art, error) {
 	var art Art
 	err := db.First(&art, id).Error
 	return art, err
+}
+
+func FindArtByArtist(artistId uint64) ([]Art, error) {
+	db := initDB()
+	var arts []Art
+	err := db.Where("artist_id = ?", artistId).Find(&arts).Error
+	return arts, err
 }
 
 type Artist struct {

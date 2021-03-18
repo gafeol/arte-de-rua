@@ -31,8 +31,8 @@ var artType = graphql.NewObject(
 			"artist": &graphql.Field{
 				Type: artistType,
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					art := p.Source.(*classes.Art)
-					return classes.FindArtist(art.ArtistID)
+					art := p.Source.(orm.Art)
+					return orm.FindArtist(art.ArtistID)
 				},
 			},
 		},
@@ -58,6 +58,16 @@ var artistType = graphql.NewObject(
 	},
 )
 
+func init() {
+	artistType.AddFieldConfig("arts", &graphql.Field{
+		Type: graphql.NewList(artType),
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			artist := p.Source.(orm.Artist)
+			return orm.FindArtByArtist(artist.ID)
+		},
+	})
+}
+
 var queryType = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "Query",
@@ -65,7 +75,7 @@ var queryType = graphql.NewObject(
 			"arts": &graphql.Field{
 				Type: graphql.NewList(artType),
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					art, err := classes.AllArts()
+					art, err := orm.AllArts()
 					return art, err
 				},
 			},
@@ -79,7 +89,7 @@ var queryType = graphql.NewObject(
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					stringID, ok := p.Args["id"].(uint64)
 					if ok {
-						art, err := classes.FindArt(stringID)
+						art, err := orm.FindArt(stringID)
 						return art, err
 					} else {
 						return nil, errors.New("ID was not a string")
@@ -89,7 +99,7 @@ var queryType = graphql.NewObject(
 			"artists": &graphql.Field{
 				Type: graphql.NewList(artistType),
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					return classes.AllArtists()
+					return orm.AllArtists()
 				},
 			},
 			"artist": &graphql.Field{
@@ -101,7 +111,7 @@ var queryType = graphql.NewObject(
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 					id := p.Args["id"].(uint64)
-					return classes.FindArtist(id)
+					return orm.FindArtist(id)
 				},
 			},
 		},
@@ -122,7 +132,7 @@ var mutationType = graphql.NewObject(
 						Type: graphql.String,
 					},
 					"artistID": &graphql.ArgumentConfig{
-						Type: graphql.ID,
+						Type: graphql.NewNonNull(graphql.ID),
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
@@ -133,7 +143,7 @@ var mutationType = graphql.NewObject(
 					if err != nil {
 						panic(err)
 					}
-					art := &classes.Art{Frase: fraseString, ImgURL: imgURLString, ArtistID: artistID}
+					art := &orm.Art{Frase: fraseString, ImgURL: imgURLString, ArtistID: artistID}
 					if err := art.Create(); err != nil {
 						return nil, err
 					}
@@ -144,13 +154,13 @@ var mutationType = graphql.NewObject(
 				Type: artistType,
 				Args: graphql.FieldConfigArgument{
 					"nome": &graphql.ArgumentConfig{
-						Type: graphql.String,
+						Type: graphql.NewNonNull(graphql.String),
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 
 					nomeString, _ := p.Args["nome"].(string)
-					artist := &classes.Artist{Nome: nomeString}
+					artist := &orm.Artist{Nome: nomeString}
 					if err := artist.Create(); err != nil {
 						return nil, err
 					}
