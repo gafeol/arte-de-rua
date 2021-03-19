@@ -3,6 +3,7 @@ package orm
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
 	"sync"
 )
 
@@ -11,10 +12,17 @@ var db *gorm.DB = nil
 
 func initDB() *gorm.DB {
 	once.Do(func() {
+		prodDBURL := os.Getenv("DATABASE_URL")
+
+		var pgConfig gorm.Dialector
+		if len(prodDBURL) == 0 {
+			pgConfig = postgres.New(postgres.Config{DSN: "host=localhost user=artederua password=SuperSecret dbname=artederua port=5432 sslmode=disable"})
+		} else {
+			pgConfig = postgres.Open(prodDBURL)
+		}
+
 		var err error
-		db, err = gorm.Open(postgres.New(postgres.Config{
-			DSN: "host=localhost user=artederua password=SuperSecret dbname=artederua port=5432 sslmode=disable",
-		}), &gorm.Config{})
+		db, err = gorm.Open(pgConfig, &gorm.Config{})
 		if err != nil {
 			panic(err)
 		}
