@@ -10,7 +10,7 @@ import (
 
 type Art struct {
 	ID       uint64
-	Frase    string
+	Phrase   string
 	ImgURL   string
 	ArtistID uint64
 }
@@ -22,7 +22,7 @@ var artType = graphql.NewObject(
 			"id": &graphql.Field{
 				Type: graphql.ID,
 			},
-			"frase": &graphql.Field{
+			"phrase": &graphql.Field{
 				Type: graphql.String,
 			},
 			"imgURL": &graphql.Field{
@@ -41,7 +41,7 @@ var artType = graphql.NewObject(
 
 type Artist struct {
 	ID   uint64
-	Nome string
+	Name string
 }
 
 var artistType = graphql.NewObject(
@@ -51,7 +51,7 @@ var artistType = graphql.NewObject(
 			"id": &graphql.Field{
 				Type: graphql.ID,
 			},
-			"nome": &graphql.Field{
+			"name": &graphql.Field{
 				Type: graphql.String,
 			},
 		},
@@ -125,7 +125,7 @@ var mutationType = graphql.NewObject(
 			"addArt": &graphql.Field{
 				Type: artType,
 				Args: graphql.FieldConfigArgument{
-					"frase": &graphql.ArgumentConfig{
+					"phrase": &graphql.ArgumentConfig{
 						Type: graphql.String,
 					},
 					"imgURL": &graphql.ArgumentConfig{
@@ -136,14 +136,14 @@ var mutationType = graphql.NewObject(
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					fraseString := p.Args["frase"].(string)
+					phraseString := p.Args["phrase"].(string)
 					imgURLString := p.Args["imgURL"].(string)
 					artistIDString := p.Args["artistID"].(string)
 					artistID, err := strconv.ParseUint(artistIDString, 10, 64)
 					if err != nil {
 						panic(err)
 					}
-					art := &orm.Art{Frase: fraseString, ImgURL: imgURLString, ArtistID: artistID}
+					art := &orm.Art{Phrase: phraseString, ImgURL: imgURLString, ArtistID: artistID}
 					if err := art.Create(); err != nil {
 						return nil, err
 					}
@@ -153,14 +153,14 @@ var mutationType = graphql.NewObject(
 			"addArtist": &graphql.Field{
 				Type: artistType,
 				Args: graphql.FieldConfigArgument{
-					"nome": &graphql.ArgumentConfig{
+					"name": &graphql.ArgumentConfig{
 						Type: graphql.NewNonNull(graphql.String),
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 
-					nomeString, _ := p.Args["nome"].(string)
-					artist := &orm.Artist{Nome: nomeString}
+					nameString, _ := p.Args["name"].(string)
+					artist := &orm.Artist{Name: nameString}
 					if err := artist.Create(); err != nil {
 						return nil, err
 					}

@@ -39,7 +39,7 @@ func initDB() *gorm.DB {
 type Art struct {
 	gorm.Model
 	ID       uint64
-	Frase    string
+	Phrase   string
 	ImgURL   string
 	ArtistID uint64
 }
@@ -73,7 +73,7 @@ func FindArtByArtist(artistId uint64) ([]Art, error) {
 type Artist struct {
 	gorm.Model
 	ID   uint64
-	Nome string
+	Name string
 }
 
 func (artist *Artist) Create() error {
