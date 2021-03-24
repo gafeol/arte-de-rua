@@ -66,6 +66,14 @@ func init() {
 			return orm.FindArtByArtist(artist.ID)
 		},
 	})
+	artistType.AddFieldConfig("nArts", &graphql.Field{
+		Type: graphql.Int,
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			artist := p.Source.(orm.Artist)
+			arts, err := orm.FindArtByArtist(artist.ID)
+			return len(arts), err
+		},
+	})
 }
 
 var queryType = graphql.NewObject(
@@ -87,9 +95,11 @@ var queryType = graphql.NewObject(
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					stringID, ok := p.Args["id"].(uint64)
+					stringID, ok := p.Args["id"].(string)
+
 					if ok {
-						art, err := orm.FindArt(stringID)
+						id, err := strconv.ParseUint(stringID, 10, 64)
+						art, err := orm.FindArt(id)
 						return art, err
 					} else {
 						return nil, errors.New("ID was not a string")
@@ -110,7 +120,11 @@ var queryType = graphql.NewObject(
 					},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					id := p.Args["id"].(uint64)
+					idString := p.Args["id"].(string)
+					id, err := strconv.ParseUint(idString, 10, 64)
+					if err != nil {
+						return nil, err
+					}
 					return orm.FindArtist(id)
 				},
 			},
